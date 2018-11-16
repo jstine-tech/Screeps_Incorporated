@@ -5,7 +5,7 @@ function RoomDepartment(spawn) {
         return this.room.controller;
     }
 
-    this.run = function() {
-        //do stuff
-    }
+    /*this.run = function() {
+        this.
+    }*/
 }
