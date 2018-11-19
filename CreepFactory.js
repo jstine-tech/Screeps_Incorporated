@@ -44,9 +44,6 @@ function CreepFactory(spawn) {
                     let newHCreep = new Creeper(creep);
                     newHCreep.source = newHCreep.creep.memory.source;
                     newHCreep.transport = null;
-                    newHCreep.assignTransport = function(transCreep) {
-                        this.transport = transCreep;
-                    }
                     newHCreep.run = function () {
                         if(this.creep.harvest(this.source) === ERR_NOT_IN_RANGE) {
                             this.creep.moveTo(this.source);
@@ -59,9 +56,10 @@ function CreepFactory(spawn) {
                     return newHCreep;
                 case 'transporter':
                     let newTCreep = new Creeper(creep);
-                    newTCreep.harvester = null;
+                    newTCreep.harvester = creep.memory.harvester;
+                    this.pathToHarvester = this.pos.findPathTo(newTCreep.harvester, {ignoreCreeps: true});
                     newTCreep.run = function () {
-                        //do transporter stuff
+                        if(this.memory.status = 'replenishingStores');
                     };
                     return newTCreep;
                 case 'builder':

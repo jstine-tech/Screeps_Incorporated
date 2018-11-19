@@ -3,9 +3,7 @@ function Creeper(creep) { //for new creep, expects isNew, spawn, typoe, name, an
     this.creep = creep;
     this.id = Game.getObjectById(creep);
     this.role = this.creep.role;
-    this.setPath = function(path) {
-        this.path = path;
-    };
+    this.path = null;
 
     this.getHP = function() {
         return this.creep.hits;

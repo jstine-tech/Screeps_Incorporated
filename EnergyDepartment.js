@@ -1,11 +1,12 @@
 function EnergyDepartment(spawn, room, energy) {
+    this.roomDepartment = room;
     this.room = room.room;
     this.sources = energy;
-    this.sourcesHarvested = {};
+    this.sourcesHarvested = {}; //id of creep associated with source;
     this.firstTime = true;
 
     this.requestNewHarvester = function (source) {
-        this.room.creepDepartment.newCreepRequest('harvester' + (Math.floor(Math.random() * 600000) + 1), [WORK, WORK, CARRY, MOVE], {
+        this.roomDepartment.creepDepartment.newCreepRequest('harvester' + (Math.floor(Math.random() * 600000) + 1), [WORK, WORK, CARRY, MOVE], {
             memory: {
                 role: 'harvester',
                 source: source
@@ -15,7 +16,7 @@ function EnergyDepartment(spawn, room, energy) {
 
 
     this.run = function () {
-        for (let creep of this.room.creepDepartment.creeps) { //check for new creeps
+        for (let creep of this.roomDepartment.creepDepartment.creeps) { //check for new creeps
             if (creep[1].role === 'harvester') {
                 this.sourcesHarvested[creep[1].id] = creep[1].source;
             }
@@ -35,7 +36,7 @@ function EnergyDepartment(spawn, room, energy) {
         if(this.firstTime == true) {
             this.firstTime = false;
             for(let i = 0; i<this.sources.length; i++) {
-                this.requestNewHarvester(this.sources[i]);
+                this.roomDepartment.requestNewHarvester(this.sources[i]);
             }
         } //done
 
