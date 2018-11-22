@@ -12,15 +12,26 @@ function CreepDepartment(spawn, RoomDepartment, factory) {
 
     this.run = function() {
         //ADD ROUTINE TO DELETE CREEPS FROM ARRAY THAT ARE NO LONGER THERE.
+        //added down below
+        for(let creep in this.creeps) {
+            if(Game.getObjectById(creep) == undefined) {
+               delete this.creeps[creep];
+            }
+        }
 
+        //end old creep routine
 
         if(_.isEmpty(creeps) == true) { //if creeps is empty
             if(_.isEmpty(Game.creeps) !== true) { //and creeps are creeps already made in the room
                 //TODO: BUGGED WILL ADD CREEPS THAT ARE ALREADY IN CREEPS ARRAY. FIX THIS
+                //no longer bugged, but not tested as of 11/22/2018
                 for(let name in Game.creeps) {
-                    let newCreep = this.factory.createCreep(creep);
-
-                    this.creeps[newCreep.id] = newCreep;
+                    let creep = Game.creeps[name];
+                    let inArray = this.creeps.find(function(creep) {return Game.getObjectById(creep[0]) != undefined});
+                    if(inArray == undefined) {
+                        let newCreep = this.factory.createCreep(name);
+                        this.creeps[newCreep.id] = newCreep;
+                    }
                 }
             } else {
                 //if there are no creeps in game and creeps is empty
