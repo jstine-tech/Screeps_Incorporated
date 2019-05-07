@@ -6,12 +6,12 @@ function RoomDepartment(spawn) {
     this.transportationDepartment = new TransportationDepartment(this.spawn, this); //new transportationDepartment for the room
     this.checkController = function() {
         return this.room.controller;
-    }
+    };
 
     this.run = function() {
-        //this.transportationDepartment.run();
         this.energyDepartment.run();
         this.transportationDepartment.run();
+        //this.transportationDepartment.run();
         this.creepDepartment.run(); //creepDepartment is last, since the other department send requests for creepers to creeper manager or change existing creepers' behavior
-    }
-}
+    };
+};

@@ -26,4 +26,4 @@ function Creeper(creep) { //for new creep, expects isNew, spawn, typoe, name, an
 
 
 
-}
+};

@@ -1,10 +1,12 @@
-var TransportationDepartment = function(spawn, roomDepartment) {
-    this.spawn = spawn;
-    this.roomDepartment = roomDepartment;
-    this.room = roomDepartment.room;
-    this.transportCreeps = {};
+class transportationDepartment {
+    constructor(spawn, roomDepartment) {
+        this.spawn = spawn;
+        this.roomDepartment = roomDepartment;
+        this.room = roomDepartment.room;
+        this.transportCreeps = {};
+    }
 
-    this.requestNewTransporter = function (harvester) {
+    requestNewTransporter(harvester) {
         this.roomDepartment.creepDepartment.newCreepRequest('transporter' + (Math.floor(Math.random() * 600000) + 1), [CARRY,CARRY,CARRY,CARRY,MOVE,MOVE], {
             memory: {
                 role: 'transporter',
@@ -14,7 +16,7 @@ var TransportationDepartment = function(spawn, roomDepartment) {
         })
     }
 
-    function run() {
+    run() {
 
         //following checks for dead creeps
         if (_.isEmpty(this.transportCreeps == false)) { //if not empty

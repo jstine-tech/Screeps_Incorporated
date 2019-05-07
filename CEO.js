@@ -1,6 +1,6 @@
-function CEO() {
+function CEO(spawn) {
     //CEO for only one room
-    this.spawn = Game.spawns['Spawn1'];
+    this.spawn = Game.spawns[spawn];
     this.RoomDepartment = new RoomDepartment(this.spawn);
 
     this.run = function() {
@@ -13,9 +13,9 @@ function CEO() {
         this.RoomDepartment.run();
     };
 
-}
+};
 
-var CEO = new CEO();
+var CEO = new CEO('Spawn1');
 CEO.run();
 
 

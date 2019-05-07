@@ -1,13 +1,15 @@
-function CreepFactory(spawn) {
-    this.spawn = spawn;
-    this.queue = [];
-    this.spawning={};
+class CreepFactory {
+    constructor(spawn) {
+        this.spawn = spawn;
+        this.queue = [];
+        this.spawning = {};
+    }
 
-    this.addCreepToQueue = function(name, type, memory) {
+    addCreepToQueue(name, type, memory) {
         this.queue.push({name: name, type: type, memory: memory});
     };
 
-    this.spawnCreep = function(name, type, memory) {
+    spawnCreep(name, type, memory) {
         let status = this.spawn.spawnCreep(type, name, memory);
         if(status === 0) {
             this.spawning = this.spawn.spawning;
@@ -17,7 +19,7 @@ function CreepFactory(spawn) {
         }
     };
 
-    this.startSpawningCreep = function() { //expects an array, string, and string
+    startSpawningCreep() { //expects an array, string, and string
         let creep;
         if(_.isEmpty(this.queue)!== true) { //if queue isn't empty
             creep = this.queue[0]; //attempt to spawn the latest creep (first in queue
@@ -36,7 +38,7 @@ function CreepFactory(spawn) {
         }
     };
 
-    this.createCreep = function(name) { //creates class wrapper for creep
+    createCreep(name) { //creates class wrapper for creep
         let creep = Game.creeps[name];
         if(creep !== undefined) {
             switch (creep.memory.role) {
@@ -54,7 +56,7 @@ function CreepFactory(spawn) {
                             this.creep.moveTo(this.source);
                         }
 
-                        if(this.getCurCarry('energy') == this.getMaxCarry() && this.transport) { //attempt to transfer energy to transport if not dead
+                        if(this.getCurCarry('energy') === this.getMaxCarry() && this.transport) { //attempt to transfer energy to transport if not dead
                             this.creep.transfer(this.transport);
                         }
                     };
@@ -66,16 +68,16 @@ function CreepFactory(spawn) {
                     this.memory.status = 'replenishingStores';
                     newTCreep.run = function () {
                         //update memory.status
-                        if(this.memory.status == 'replenishingStores' && this.getCurCarry(RESOURCE_ENERGY) < this.getMaxCarry()) {
+                        if(this.memory.status === 'replenishingStores' && this.getCurCarry(RESOURCE_ENERGY) < this.getMaxCarry()) {
                             this.memory.status = 'replenished';
                         }
 
                         //action after memory.status is set
-                        if(this.memory.status == 'replenishingStores') {
+                        if(this.memory.status === 'replenishingStores') {
                             this.creep.moveTo(this.harvester);
                         }
 
-                        if(this.memory.status == 'replenished') {
+                        if(this.memory.status === 'replenished') {
                             if(this.creep.transfer(Game.spawns['Spawn1'], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                                 this.creep.moveTo(Game.spawns['Spawn1']);
                             }
@@ -94,7 +96,7 @@ function CreepFactory(spawn) {
         }
     };
 
-    this.run = function(){
+    run(){
         if(_.isEmpty(this.spawning) === false) { //if spawning is set, there is a creeper spawning
             if(Game.creeps[this.spawning.name] !== undefined) {
                 let creep = createCreep(this.spawning.name);
