@@ -1,58 +1,23 @@
-class Creeper { //for new creep, expects isNew, spawn, typoe, name, and role
-    constructor(creep, ceo) {
-        console.log('In Creeper constructor');
-        this.creep = creep;
-        this.id = Game.getObjectById(creep);
-        this.role = this.creep.role;
-        this.path = null;
-        this.ceo = ceo;
-    }
-
-    getHP = function() {
-        console.log('In Creeper getHP');
-        return this.creep.hits;
-    };
-
-    getHPMax = function() {
-        console.log('In Creeper getHPMax');
-        return this.creep.hitsMax;
-    };
-
-    getCurCarry = function(resource) {
-        console.log('In Creeper getCurCarry');
-        if(resource === 'energy') {
-            return this.creep.carry.energy;
-        }
-
-    };
-
-    getMaxCarry= function() {
-        console.log('In Creeper getMaxCarry');
-        return this.creep.carryCapacity;
-    }
-
-
-
-};
+require('prototype.Creep')();
 
 class CreepFactory {
-    constructor(spawn) {
-        console.log('In creepFactory constructor');
+    constructor(spawn, energy, transportation) {
+        ////console.log('In creepFactory constructor');
         this.spawn = spawn;
         this.queue = [];
         this.spawning = {};
     }
 
     addCreepToQueue(name, type, memory) {
-        console.log('In creepFactory addCreepToQueue');
+        ////console.log('In creepFactory addCreepToQueue');
         this.queue.push({name: name, type: type, memory: memory});
     };
 
     spawnCreep(name, type, memory) {
-        console.log('In creepFactory spawnCreep');
+        ////console.log('In creepFactory spawnCreep');
         let status = this.spawn.spawnCreep(type, name, memory);
         if(status === 0) {
-            this.spawning = this.spawn.spawning;
+            //this.spawning = this.spawn;
             return true;
         } else {
             return false;
@@ -60,7 +25,7 @@ class CreepFactory {
     };
 
     startSpawningCreep() {
-        console.log('In creepFactory startSpawningCreep');
+        ////console.log('In creepFactory startSpawningCreep');
         let creep;
         if(_.isEmpty(this.queue)!== true) { //if queue isn't empty
             creep = this.queue[0]; //attempt to spawn the latest creep (first in queue
@@ -69,7 +34,15 @@ class CreepFactory {
         }
         let status = this.spawnCreep(creep.name, creep.type, creep.memory);
         if(status === true) { //if spawning successful, set this.spawning to creeper that is spawning
+            console.log('Status is true');
             this.queue.shift();
+            for(let name in Game.creeps) {
+                let creep = Game.creeps[name];
+                if(creep.spawning === true) {
+                    console.log('this.spawning set to creep');
+                    this.spawning = creep;
+                }
+            }
             return 'spawning';
 
         } else { //if creeper spawning unsuccessful, return undefined
@@ -78,175 +51,28 @@ class CreepFactory {
     };
 
     createCreep(name) { //creates class wrapper for creep
-        console.log('In creepFactory createCreep');
+        ////console.log('In creepFactory createCreep');
         let creep = Game.creeps[name];
+        console.log(creep);
         if(creep !== undefined) {
             switch (creep.memory.role) {
                 case 'harvester':
-                    let newHCreep = new Creeper(creep, this.ceo);
-                    newHCreep.source = newHCreep.creep.memory.source;
-                    newHCreep.transport = null;
-                    newHCreep.requested = false;
-                    newHCreep.requestedName = '';
-                    newHCreep.run = function() {
 
-                        if(!newHCreep.transport) { //check if transport has died
-                            newHCreep.transport = undefined;
-                            if(newHCreep.requested !== true) {
-                                newHCreep.requestedName = newHCreep.ceo.transportationDepartment.requestNewTransporter(newHCreep.creep);
-                                newHCreep.requested = true;
-                            } else {
-                                for (let id in this.ceo.creepDepartment.creeps) { //check for new creeps
-                                    let tempCreep = Game.getObjectById(id);
-                                    if (tempCreep.memory.role === 'transporter') {
-                                        if(tempCreep.name === newHCreep.requestedName) {
-                                            newHCreep.requested = false;
-                                            newHCreep.requestedName = '';
-                                            newHCreep.transport = tempCreep;
-                                        }
-                                    }
-                                }
-                            }
-
-                        }
-
-                        if(newHCreep.creep.harvest(newHCreep.source) === ERR_NOT_IN_RANGE) {
-                            newHCreep.creep.moveTo(newHCreep.source);
-                        }
-
-                        if(newHCreep.getCurCarry('energy') === newHCreep.getMaxCarry() && newHCreep.transport) { //attempt to transfer energy to transport if not dead
-                            newHCreep.creep.transfer(newHCreep.transport);
-                        }
-                    };
-                    return newHCreep;
+                    return 0;
                 case 'transporter':
-                    let newTCreep = new Creeper(creep, this.ceo);
-                    newTCreep.harvester = creep.memory.harvester;
-                    //newTCreep.pathToHarvester = this.pos.findPathTo(newTCreep.harvester);
-                    newTCreep.memory.status = 'replenishingStores';
-                    newTCreep.requested = false;
-                    newTCreep.requestedName = '';
-                    newTCreep.run = function() {
-                        //check if harvester is dead
-                        if(!newTCreep.harvester) { //check if transport has died
-                            newTCreep.harvester = undefined;
-                            if(newTCreep.requested !== true) {
-                                newTCreep.requestedName = newTCreep.ceo.energyDepartment.requestNewHarvester(newTCreep.creep);
-                                newTCreep.requested = true;
-                            } else {
-                                for (let id in this.ceo.creepDepartment.creeps) { //check for new creeps
-                                    let tempCreep = Game.getObjectById(id);
-                                    if (tempCreep.memory.role === 'harvester') {
-                                        if(tempCreep.name === newTCreep.requestedName) {
-                                            newTCreep.requested = false;
-                                            newTCreep.requestedName = '';
-                                            newTCreep.harvester = tempCreep;
-                                        }
-                                    }
-                                }
-                            }
+                    //creep.pathToHarvester = this.pos.findPathTo(creep.harvester);
 
-                        }
-
-                        //update memory.status
-                        if(newTCreep.creep.memory.status === 'replenishingStores' && newTCreep.getCurCarry(RESOURCE_ENERGY) === newTCreep.getMaxCarry()) {
-                            newTCreep.creep.memory.status = 'replenished';
-                        }
-
-                        //action after memory.status is set
-                        if(newTCreep.creep.memory.status === 'replenishingStores' && newTCreep.transport) {
-                            newTCreep.creep.moveTo(newTCreep.memory.harvester);
-                        }
-
-                        if(newTCreep.creep.memory.status === 'replenished') {
-                            if(newTCreep.creep.transfer(Game.spawns['Spawn1'], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                                newTCreep.creep.moveTo(Game.spawns['Spawn1']);
-                            }
-                            if(newTCreep.getCurCarry(RESOURCE_ENERGY) === 0) {
-                                newTCreep.creep.memory.status = 'replenishingStores';
-                            }
-                        }
-                    };
-                    return newTCreep;
+                    return 0;
                 case 'builder':
-                    let newBCreep = new Creeper(creep);
-                    newBCreep.creep.memory.status = 'replenishingStores';
-                    newBCreep.run = function() {
-                        //update memory.status
-                        if(newRCreep.creep.memory.status === 'replenishingStores' && newTCreep.getCurCarry(RESOURCE_ENERGY) === newRCreep.getMaxCarry()) {
-                            newRCreep.creep.memory.status = 'replenished';
-                        }
 
-                        //action after memory.status is set
-                        if(newRCreep.creep.memory.status === 'replenishingStores') {
-                            newRCreep.creep.moveTo(newRCreep.creep.room.find(FIND_SOURCES)[0]);
-                        }
 
-                        if(newRCreep.memory.status === 'replenished') {
-                            let constructionSite = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
-                            if(constructionSite) {
-                                if(newRCreep.creep.build(constructionSite) === ERR_NOT_IN_RANGE) {
-                                    newRCreep.creep.moveTo(structure);
-                                }
-                            }
-                            if(newRCreep.getCurCarry(RESOURCE_ENERGY) === 0) {
-                                newRCreep.creep.memory.status = 'replenishingStores';
-                            }
-                        }
-                    };
-                    return newBCreep;
+                    return 0;
                 case 'repairer':
-                    let newRCreep = new Creeper(creep);
-                    newrCreep.creep.memory.status = 'replenishingStores';
-                    newRCreep.run = function() {
-                        //update memory.status
-                        if(newRCreep.creep.memory.status === 'replenishingStores' && newRCreep.getCurCarry(RESOURCE_ENERGY) === newRCreep.getMaxCarry()) {
-                            newRCreep.creep.memory.status = 'replenished';
-                        }
 
-                        //action after memory.status is set
-                        if(newRCreep.creep.memory.status === 'replenishingStores') {
-                            newRCreep.creep.moveTo(newRCreep.creep.room.find(FIND_SOURCES)[0]);
-                        }
-
-                        if(newRCreep.memory.status === 'replenished') {
-                            let structure = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
-                                filter: (s) => s.hits < s.hitsMax && s.structureType != STRUCTURE_WALL
-                            });
-                            if(newRCreep.creep.repair(structure) === ERR_NOT_IN_RANGE) {
-                                newRCreep.creep.moveTo(structure);
-                            }
-                            if(newRCreep.getCurCarry(RESOURCE_ENERGY) === 0) {
-                                newRCreep.creep.memory.status = 'replenishingStores';
-                            }
-                        }
-                    };
-                    return newRCreep;
+                    return 0;
                 case 'controller':
-                    let newCCreep = new Creeper(creep);
-                    let controller = creep.memory.controller;
-                    newCCreep.creep.memory.status = 'replenishingStores';
-                    newCCreep.run = function() {
-                        //update memory.status
-                        if(newCCreep.creep.memory.status === 'replenishingStores' && newTCreep.getCurCarry(RESOURCE_ENERGY) === newCCreep.getMaxCarry()) {
-                            newCCreep.creep.memory.status = 'replenished';
-                        }
 
-                        //action after memory.status is set
-                        if(newCCreep.creep.memory.status === 'replenishingStores') {
-                            newCCreep.creep.moveTo(newTCreep.creep.room.find(FIND_SOURCES)[0]);
-                        }
-
-                        if(newCCreep.memory.status === 'replenished') {
-                            if(newCCreep.creep.transfer(newTCreep.creep.room.controller, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-                                newCCreep.creep.moveTo(newTCreep.creep.room.controller);
-                            }
-                            if(newCCreep.getCurCarry(RESOURCE_ENERGY) === 0) {
-                                newCCreep.creep.memory.status = 'replenishingStores';
-                            }
-                        }
-                    };
-                    return newCCreep;
+                    return 0;
 
             }
         } else {
@@ -255,26 +81,25 @@ class CreepFactory {
     };
 
     run(){
-        console.log('In creepFactory run');
-        console.log(this.queue);
+        //console.log('In creepFactory run');
+        //console.log(this.queue);
+        //console.log(JSON.stringify(this.queue));
         if(_.isEmpty(this.spawning) === false) { //if spawning is set, there is a creeper spawning
-            if(Game.creeps[this.spawning.name] !== undefined) {
-                let creep = createCreep(this.spawning.name);
-                this.spawning = {};
-                return creep;
-            } else {
-                return undefined;
-            }
+            console.log('First If');
+            console.log('In creep creation');
+            let creep = this.createCreep(this.spawning.name);
+            this.spawning = {};
+            return creep;
+
         } else { //if spawning is not set
             let result = this.startSpawningCreep();
-            //will probably do something with result in a later iteration...
         }
     };
-};
+}
 
 class creepDepartment {
     constructor(spawn, factory) {
-        console.log('In creepDepartment constructor');
+        ////console.log('In creepDepartment constructor');
         this.spawn = spawn;
         this.factory = factory;
         this.creeps = {};
@@ -284,12 +109,12 @@ class creepDepartment {
 
     newCreepRequest(name, type, memory)
     {
-        console.log('In creepDepartment newCreepRequest');
+        ////console.log('In creepDepartment newCreepRequest');
         this.factory.addCreepToQueue(name, type, memory);
     }
 
     inArray(name) {
-        console.log('In creepDepartment inArray');
+        ////console.log('In creepDepartment inArray');
         for(let id in this.creeps) {
             let classWrapper = this.creeps[id];
             if(classWrapper.creep.name == name) {
@@ -300,7 +125,7 @@ class creepDepartment {
     }
 
     run() {
-        console.log('In creepDepartment run');
+        ////console.log('In creepDepartment run');
         //added down below
         for(let creep in this.creeps) {
             if(Game.getObjectById(creep) == undefined) {
@@ -323,23 +148,30 @@ class creepDepartment {
             } else {
 
             }
-        } else { //if there are creeps in object, then run them
-            for(let id in this.creeps) {
-                this.creeps[id].run();
+        } else {
 
-            }
         }
         let result = this.factory.run(); //run factory, which will spawn creeps in queue, if any
-        if(result instanceof Creeper) { //factory will return a creeper once it is spawned
-            this.creeps[result.id] = result; //add returned creeper to hashmap of creeps
-        }
+        ////console.log('Finished running factory');
+        ////console.log(result);
+        ////console.log(JSON.stringify(result));
+        //console.log(JSON.stringify(this.creeps);
+
         this.firstTime = false;
+        for(let name in Game.creeps) {
+            console.log('Running creeps');
+            console.log(Game.creeps[name]);
+            console.log(JSON.stringify(Game.creeps[name]));
+            console.log(Game.creeps[name].run());
+
+        }
+
     }
 }
 
 class transportationDepartment {
     constructor(spawn, roomDepartment, creepDepartment) {
-        console.log('In transportDepartment constructor');
+        ////console.log('In transportDepartment constructor');
         this.spawn = spawn;
         this.transportCreeps = {};
         this.roomDepartment = roomDepartment;
@@ -349,7 +181,7 @@ class transportationDepartment {
     }
 
     getBody() {
-        console.log('In transportDepartment getBody');
+        ////console.log('In transportDepartment getBody');
         let body = [CARRY, MOVE];
         let energy = Math.floor(this.roomDepartment.room.energyAvailable*(1/3));
         let parts = Math.floor(energy/100);
@@ -363,7 +195,7 @@ class transportationDepartment {
     }
 
     requestNewTransporter(harvester) {
-        console.log('In transportDepartment requestNewTransporter');
+        ////console.log('In transportDepartment requestNewTransporter');
         let name = 'transporter' + (Math.floor(Math.random() * 600000) + 1);
         this.creepDepartment.newCreepRequest(name, this.getBody(), {
             memory: {
@@ -376,10 +208,10 @@ class transportationDepartment {
     }
 
     requestRoad(id) {
-        console.log('In transportDepartment requestRoad');
-        console.log(JSON.stringify(this.roomDepartment.paths));
+        ////console.log('In transportDepartment requestRoad');
+        ////console.log(JSON.stringify(this.roomDepartment.paths));
         let road = this.roomDepartment.paths[id];
-        console.log(road);
+        ////console.log(road);
         for(let i = 0; i < road.length; i++) {
             this.roomDepartment.addToMatrixMap(STRUCTURE_ROAD, road[i].x, road[i].y);
         }
@@ -388,7 +220,7 @@ class transportationDepartment {
     }
 
     run() {
-        console.log('In transportDepartment run');
+        ////console.log('In transportDepartment run');
         //following checks for dead creeps
         if (_.isEmpty(this.transportCreeps == false)) { //if not empty
             for (let id in this.transportCreeps) { //get rid of any creeps that are now dead
@@ -414,7 +246,7 @@ class transportationDepartment {
 
 class energyDepartment {
     constructor(spawn, roomDepartment, creepDep, transDep) {
-        console.log('In energyDepartment constructor');
+        ////console.log('In energyDepartment constructor');
         this.spawn = spawn;
         this.roomDepartment = roomDepartment;
         this.sources = this.roomDepartment.room.find(FIND_SOURCES);
@@ -426,7 +258,7 @@ class energyDepartment {
     }
 
     getBody() {
-        console.log('In energyDepartment getBody');
+        ////console.log('In energyDepartment getBody');
         let body = [WORK, CARRY, MOVE];
         let energy = Math.floor(this.roomDepartment.room.energyAvailable*(2/3));
         let parts = Math.floor(energy/200);
@@ -440,7 +272,7 @@ class energyDepartment {
     }
 
     requestNewHarvester(source) {
-        console.log('In energyDepartment requestNewHarvester');
+        ////console.log('In energyDepartment requestNewHarvester');
         let creepID = 'harvester' + (Math.floor(Math.random() * 600000) + 1);
         this.transportationDepartment.requestRoad(this.roomDepartment.createPath(creepID + 'path', this.spawn.pos, source));
         this.creepDepartment.newCreepRequest(creepID, this.getBody(), {
@@ -454,7 +286,7 @@ class energyDepartment {
 
 
     run() {
-        console.log('In energyDepartment run');
+        ////console.log('In energyDepartment run');
         for (let name in Game.creeps) { //check for new creeps
             let tempCreep = Game.getObjectById(Game.creeps[name].id);
             if (tempCreep.memory.role === 'harvester') {
@@ -474,7 +306,7 @@ class energyDepartment {
             }
         }
         //now request creeps if firstTime
-        console.log('Firsttime: '+this.firstTime);
+        ////console.log('Firsttime: '+this.firstTime);
         if(this.firstTime === true) {
 
             for(let i = 0; i<this.sources.length; i++) {
@@ -487,7 +319,7 @@ class energyDepartment {
 
 class roomDepartment {
     constructor(spawn) {
-        console.log('In roomDepartment constructor');
+        ////console.log('In roomDepartment constructor');
         this.spawn = spawn;
         this.room = this.spawn.room;
         this.paths = {};
@@ -505,7 +337,7 @@ class roomDepartment {
     }
 
     getBody() {
-        console.log('In energyDepartment getBody');
+        ////console.log('In energyDepartment getBody');
         let body = [WORK, CARRY, MOVE];
         let energy = Math.floor(this.room.energyAvailable*(2/3));
         let parts = Math.floor(energy/200);
@@ -519,14 +351,14 @@ class roomDepartment {
     }
 
     createPath(id, pos1, pos2) { //expects string, RoomPosition, and RoomPosition
-        console.log('In roomDepartment createPath');
+        ////console.log('In roomDepartment createPath');
         this.paths[id] = pos1.findPathTo(pos2);
-        console.log(this.paths);
+        ////console.log(this.paths);
         return id;
     }
 
     getPath(id) {
-        console.log('In roomDepartment getPath');
+        ////console.log('In roomDepartment getPath');
         return this.paths[id];
     }
 
@@ -543,7 +375,7 @@ class roomDepartment {
     }
 
     addToMatrixMap(id, x, y) {
-        console.log('In roomDepartment addToMatrixMap');
+        ////console.log('In roomDepartment addToMatrixMap');
         let isAvailable = this.terrain.get(x, y);
         if(isAvailable === 0 || isAvailable === 1) {
             if(!Number.isInteger(this.mapMatrix[y][x])) {
@@ -555,7 +387,7 @@ class roomDepartment {
     }
 
     run() {
-        console.log('In roomDepartment run');
+        ////console.log('In roomDepartment run');
         let oldRCL = this.rcl;
         this.rcl = this.checkController();
         if(this.rcl != oldRCL) {
@@ -618,6 +450,8 @@ class structureDepartment {
         let towers = 1;
         let done = false;
         let i = 6;
+        this.builderRequested = false;
+        this.repairerRequested = false;
 
         while (done === false) {
             for(let y = spawny - (i/2); y < spawny + (i/2); y = y+2) {
@@ -657,7 +491,7 @@ class structureDepartment {
     }
 
     getBody() {
-        console.log('In structureDepartment getBody');
+        ////console.log('In structureDepartment getBody');
         let body = [WORK, CARRY, MOVE];
         let energy = Math.floor(this.roomDepartment.room.energyAvailable*(2/3));
         let parts = Math.floor(energy/200);
@@ -676,6 +510,7 @@ class structureDepartment {
                 role: 'builder',
             }
         });
+        this.builderRequested = true;
         return creepID;
     }
 
@@ -686,6 +521,7 @@ class structureDepartment {
                 role: 'repairer',
             }
         });
+        this.repairerRequested = true;
         return creepID;
     }
 
@@ -708,9 +544,8 @@ class structureDepartment {
             this.firstTime = false;
         }
 
-        if(this.roomDepartment.changed === true) {
-            this.createConstructionSites();
-        }
+        this.createConstructionSites();
+
         if(this.firstTime === false) {
             if(_.isEmpty(Game.creeps) !== true) { //and creeps are creeps already made in the room
                 let numOfBuilders = 0;
@@ -719,16 +554,24 @@ class structureDepartment {
                     let creep = Game.creeps[name];
                     if(creep.memory.role === 'builder') {
                         numOfBuilders = numOfBuilders + 1;
+                        this.builderRequested = false;
                     }
                     if(creep.memory.role === 'repairer') {
                         numOfRepairers = nomOfRepairers + 1;
+                        this.repairerRequested = false;
                     }
                 }
                 if(numOfBuilders === 0) {
-                    this.requestBuilderCreep();
+                    if(this.builderRequested === false) {
+                        this.requestBuilderCreep();
+                        this.builderRequested = true;
+                    }
                 }
                 if(numOfRepairers === 0) {
-                    this.requestRepairerCreep();
+                    if(this.repairerRequested === false) {
+                        this.requestRepairerCreep();
+                        this.repairerRequested = true;
+                    }
                 }
             } else {
                 this.requestBuilderCreep();
@@ -750,7 +593,7 @@ class CEO {
     }
 
     run() {
-        console.log('In CEO run');
+        ////console.log('In CEO run');
         this.energyDepartment.run();
         this.transportationDepartment.run();
         this.creepDepartment.run();
@@ -767,10 +610,13 @@ var energy_man = new energyDepartment(Game.spawns['Spawn1'], rooms_man, creeper,
 var structure = new structureDepartment(Game.spawns['Spawn1'], rooms_man, creeper);
 transportation.energyDepartment = energy_man;
 var theGame = new CEO('Spawn1', rooms_man, energy_man, creeper, transportation, structure);
-creepFact.ceo = theGame;
+creepFact.transportationDepartment = transportation;
+creepFact.energyDepartment = energy_man;
 rooms_man.transportationDepartment = transportation;
 rooms_man.creepDepartment = creeper;
+
 module.exports.loop = function() {
+
     theGame.run();
 }
 
