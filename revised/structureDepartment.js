@@ -1,11 +1,13 @@
 class structureDepartment {
-    constructor(spawn, ceo) {
+    constructor(spawn, room) {
         this.spawn = spawn;
-        this.ceo = ceo;
+        this.roomDepartment = room;
+        this.controller = this.roomDepartment.checkController();
+        this.firstTime = true;
     }
 
     addStructure(id, x, y) {
-        return this.ceo.roomDepartment.addToMatrixMap(id, x, y);
+        return this.roomDepartment.addToMatrixMap(id, x, y);
     }
 
     initialEnergyStructure() {
@@ -46,8 +48,9 @@ class structureDepartment {
     }
 
     run() {
-        if(this.ceo.firstTime === true) {
+        if(this.firstTime === true) {
             this.initialEnergyStructure();
+            this.firstTime = false;
         }
     }
 }
