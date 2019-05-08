@@ -3,7 +3,7 @@ class CreepFactory {
         this.spawn = spawn;
         this.queue = [];
         this.spawning = {};
-        this.ceo;
+        this.ceo = ceo;
     }
 
     addCreepToQueue(name, type, memory) {
@@ -53,17 +53,17 @@ class CreepFactory {
 
                         if(!newHCreep.transport) { //check if transport has died
                             newHCreep.transport = undefined;
-                            if(newHCreep.requested != true) {
-                                newHCreep.requestedName = this.ceo.transportationDepartment.requestNewTransporter(this.creep);
+                            if(newHCreep.requested !== true) {
+                                newHCreep.requestedName = newHCreep.ceo.transportationDepartment.requestNewTransporter(newHCreep.creep);
                                 newHCreep.requested = true;
                             } else {
                                     for (let id in this.roomDepartment.creepDepartment.creeps) { //check for new creeps
                                         let tempCreep = Game.getObjectById(id);
                                         if (tempCreep.memory.role === 'transporter') {
-                                            if(tempCreep.memory.harvester === newHCreep.creep) {
-                                                this.requested = false;
-                                                this.requestedName = '';
-                                                this.transport = tempCreep;
+                                            if(tempCreep.name === newHCreep.requestedName) {
+                                                newHCreep.requested = false;
+                                                newHCreep.requestedName = '';
+                                                newHCreep.transport = tempCreep;
                                             }
                                         }
                                     }
@@ -81,24 +81,47 @@ class CreepFactory {
                     };
                     return newHCreep;
                 case 'transporter':
-                    let newTCreep = new Creeper(creep);
+                    let newTCreep = new Creeper(creep, this.ceo);
                     newTCreep.harvester = creep.memory.harvester;
-                    newTCreep.pathToHarvester = this.pos.findPathTo(newTCreep.harvester, {ignoreCreeps: true});
+                    //newTCreep.pathToHarvester = this.pos.findPathTo(newTCreep.harvester);
                     newTCreep.memory.status = 'replenishingStores';
+                    newTCreep.requested = false;
+                    newTCreep.requestedName = '';
                     newTCreep.run = function () {
+                        //check if harvester is dead
+                        if(!newTCreep.transport) { //check if transport has died
+                            newTCreep.transport = undefined;
+                            if(newTCreep.requested !== true) {
+                                newTCreep.requestedName = newTCreep.ceo.energyDepartment.requestNewHarvester(newTCreep.creep);
+                                newTCreep.requested = true;
+                            } else {
+                                for (let id in this.roomDepartment.creepDepartment.creeps) { //check for new creeps
+                                    let tempCreep = Game.getObjectById(id);
+                                    if (tempCreep.memory.role === 'harvester') {
+                                        if(tempCreep.name === newTCreep.requestedName) {
+                                            newTCreep.requested = false;
+                                            newTCreep.requestedName = '';
+                                            newTCreep.harvester = tempCreep;
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+
                         //update memory.status
-                        if(this.memory.status === 'replenishingStores' && this.getCurCarry(RESOURCE_ENERGY) === this.getMaxCarry()) {
-                            this.memory.status = 'replenished';
+                        if(newTCreep.memory.status === 'replenishingStores' && newTCreep.getCurCarry(RESOURCE_ENERGY) === newTCreep.getMaxCarry()) {
+                            newTCreep.memory.status = 'replenished';
                         }
 
                         //action after memory.status is set
-                        if(this.memory.status === 'replenishingStores') {
-                            this.creep.moveTo(this.harvester);
+                        if(newTCreep.memory.status === 'replenishingStores') {
+                            newTCreep.creep.moveTo(this.harvester);
                         }
 
-                        if(this.memory.status === 'replenished') {
-                            if(this.creep.transfer(Game.spawns['Spawn1'], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                                this.creep.moveTo(Game.spawns['Spawn1']);
+                        if(newTCreep.memory.status === 'replenished') {
+                            if(newTCreep.creep.transfer(Game.spawns['Spawn1'], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+                                newTCreep.creep.moveTo(Game.spawns['Spawn1']);
                             }
                         }
                     };

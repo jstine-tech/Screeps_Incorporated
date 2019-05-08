@@ -3,6 +3,7 @@ class CreepDepartment {
         this.spawn = spawn;
         this.ceo = ceo;
         this.factory = factory;
+        this.creeps = {};
     }
 
 
@@ -45,10 +46,10 @@ class CreepDepartment {
             } else {
 
             }
-        } else { //if there are creeps in hashmap, then run them
+        } else { //if there are creeps in object, then run them
             for(let id in this.creeps) {
                 this.creeps[id].run();
-                //TODO: ADD CUSTOM EXCEPTION FOR COLLISION (collisionException) THEN HANDLE IT
+
             }
         }
         let result = this.factory.run(); //run factory, which will spawn creeps in queue, if any

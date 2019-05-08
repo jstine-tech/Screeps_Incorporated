@@ -1,9 +1,10 @@
 class Creeper { //for new creep, expects isNew, spawn, typoe, name, and role
-    constructor(creep) {
+    constructor(creep, ceo) {
         this.creep = creep;
         this.id = Game.getObjectById(creep);
         this.role = this.creep.role;
         this.path = null;
+        this.ceo = ceo;
     }
 
     getHP = function() {

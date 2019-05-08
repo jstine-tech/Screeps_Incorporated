@@ -28,7 +28,8 @@ class energyDepartment {
                 role: 'harvester',
                 source: source
             }
-        })
+        });
+        return creepID;
     }
 
 
