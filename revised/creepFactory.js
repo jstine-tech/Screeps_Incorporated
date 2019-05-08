@@ -1,8 +1,9 @@
 class CreepFactory {
-    constructor(spawn) {
+    constructor(spawn, ceo) {
         this.spawn = spawn;
         this.queue = [];
         this.spawning = {};
+        this.ceo;
     }
 
     addCreepToQueue(name, type, memory) {
@@ -46,29 +47,47 @@ class CreepFactory {
                     let newHCreep = new Creeper(creep);
                     newHCreep.source = newHCreep.creep.memory.source;
                     newHCreep.transport = null;
+                    newHCreep.requested = false;
+                    newHCreep.requestedName = '';
                     newHCreep.run = function () {
 
-                        if(!this.transport) { //check if transport has died
-                            this.transport = null;
+                        if(!newHCreep.transport) { //check if transport has died
+                            newHCreep.transport = undefined;
+                            if(newHCreep.requested != true) {
+                                newHCreep.requestedName = this.ceo.transportationDepartment.requestNewTransporter(this.creep);
+                                newHCreep.requested = true;
+                            } else {
+                                    for (let id in this.roomDepartment.creepDepartment.creeps) { //check for new creeps
+                                        let tempCreep = Game.getObjectById(id);
+                                        if (tempCreep.memory.role === 'transporter') {
+                                            if(tempCreep.memory.harvester === newHCreep.creep) {
+                                                this.requested = false;
+                                                this.requestedName = '';
+                                                this.transport = tempCreep;
+                                            }
+                                        }
+                                    }
+                            }
+
                         }
 
-                        if(this.creep.harvest(this.source) === ERR_NOT_IN_RANGE) {
-                            this.creep.moveTo(this.source);
+                        if(newHCreep.creep.harvest(newHCreep.source) === ERR_NOT_IN_RANGE) {
+                            newHCreep.creep.moveTo(newHCreep.source);
                         }
 
-                        if(this.getCurCarry('energy') === this.getMaxCarry() && this.transport) { //attempt to transfer energy to transport if not dead
-                            this.creep.transfer(this.transport);
+                        if(newHCreep.getCurCarry('energy') === newHCreep.getMaxCarry() && newHCreep.transport) { //attempt to transfer energy to transport if not dead
+                            newHCreep.creep.transfer(newHCreep.transport);
                         }
                     };
                     return newHCreep;
                 case 'transporter':
                     let newTCreep = new Creeper(creep);
                     newTCreep.harvester = creep.memory.harvester;
-                    this.pathToHarvester = this.pos.findPathTo(newTCreep.harvester, {ignoreCreeps: true});
-                    this.memory.status = 'replenishingStores';
+                    newTCreep.pathToHarvester = this.pos.findPathTo(newTCreep.harvester, {ignoreCreeps: true});
+                    newTCreep.memory.status = 'replenishingStores';
                     newTCreep.run = function () {
                         //update memory.status
-                        if(this.memory.status === 'replenishingStores' && this.getCurCarry(RESOURCE_ENERGY) < this.getMaxCarry()) {
+                        if(this.memory.status === 'replenishingStores' && this.getCurCarry(RESOURCE_ENERGY) === this.getMaxCarry()) {
                             this.memory.status = 'replenished';
                         }
 

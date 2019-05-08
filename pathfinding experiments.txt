@@ -1,5 +1,0 @@
-JSON.stringify(Game.spawns['Spawn1'].pos.findPathTo(Game.getObjectById('5bbcaefc9099fc012e639ee9')));
-
-JSON.stringify(PathFinder.search(Game.spawns['Spawn1'].pos, Game.getObjectById('5bbcaefc9099fc012e639ee9')))
-
-

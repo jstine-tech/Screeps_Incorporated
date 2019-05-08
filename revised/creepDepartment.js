@@ -1,7 +1,7 @@
 class CreepDepartment {
-    constructor(spawn, RoomDepartment, factory) {
+    constructor(spawn, ceo, factory) {
         this.spawn = spawn;
-        this.RoomDepartment = RoomDepartment;
+        this.ceo = ceo;
         this.factory = factory;
     }
 
@@ -34,8 +34,6 @@ class CreepDepartment {
 
         if(_.isEmpty(this.creeps) == true) { //if creeps is empty
             if(_.isEmpty(Game.creeps) !== true) { //and creeps are creeps already made in the room
-                //TODO: BUGGED WILL ADD CREEPS THAT ARE ALREADY IN CREEPS ARRAY. FIX THIS
-                //hopefully no longer bugged, but not tested as of 11/22/2018
                 for(let name in Game.creeps) {
                     let creep = Game.creeps[name];
                     let inArray = this.inArray(name);
@@ -45,8 +43,6 @@ class CreepDepartment {
                     }
                 }
             } else {
-                //if there are no creeps in game and creeps is empty
-                //insert stuff to do here, if there ever will be anything...
 
             }
         } else { //if there are creeps in hashmap, then run them
@@ -59,5 +55,6 @@ class CreepDepartment {
         if(result instanceof Creeper) { //factory will return a creeper once it is spawned
             this.creeps[result.id] = result; //add returned creeper to hashmap of creeps
         }
+        this.ceo.firstTime = false;
     }
 }

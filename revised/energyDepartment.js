@@ -5,13 +5,25 @@ class energyDepartment {
         this.roomDepartment = this.ceo.roomDepartment;
         this.sources = this.roomDepartment.room.find(FIND_SOURCES);
         this.sourcesHarvested = {}; //id of creep associated with source;
-        this.firstTime = true;
+    }
+
+    getBody() {
+        let body = [WORK, CARRY, MOVE];
+        let energy = Math.floor(this.roomDepartment.room.energyAvailable*(2/3));
+        let parts = Math.floor(energy/200);
+        let toReturn = [];
+        for(let i=1; i <= parts; i++) {
+            toReturn = toReturn.concat(body);
+        }
+        return toReturn;
+
+
     }
 
     requestNewHarvester(source) {
         let creepID = 'harvester' + (Math.floor(Math.random() * 600000) + 1);
-        this.ceo.transportationDepartment.requestRoad(this.roomDepartment.createPath(creepID + 'path', this.spawn.pos, source);)
-        this.roomDepartment.creepDepartment.newCreepRequest(creepID, [WORK, WORK, CARRY, MOVE], {
+        this.ceo.transportationDepartment.requestRoad(this.roomDepartment.createPath(creepID + 'path', this.spawn.pos, source));
+        this.roomDepartment.creepDepartment.newCreepRequest(creepID, this.getBody(), {
             memory: {
                 role: 'harvester',
                 source: source
@@ -25,7 +37,7 @@ class energyDepartment {
             let tempCreep = Game.getObjectById(id);
             if (tempCreep.memory.role === 'harvester') {
                 this.sourcesHarvested[tempCreep.id] = tempCreep.source;
-                this.firstTime = false;
+                this.ceo.firstTime = false;
             }
         }
 
@@ -41,7 +53,6 @@ class energyDepartment {
         }
         //now request creeps if firstTime
         if(this.firstTime == true) {
-            this.firstTime = false;
 
             for(let i = 0; i<this.sources.length; i++) {
                 this.requestNewHarvester(this.sources[i]);
